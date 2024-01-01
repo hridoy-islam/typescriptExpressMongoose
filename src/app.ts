@@ -3,9 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import cors from 'cors'
-import express, { Application, Request, Response } from 'express'
-import globalErrorHandler from './app/middlewares/globalErrorhandler'
-import notFound from './app/middlewares/notFound'
+import express, { Application, NextFunction, Request, Response } from 'express'
 import router from './app/routes'
 
 const app: Application = express()
@@ -25,9 +23,22 @@ const test = (req: Request, res: Response) => {
 
 app.get('/', test)
 
-app.use(globalErrorHandler)
+const errorHandler = function (
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  res.status(500).json({
+    success: false,
+    message: err.message || 'User not found',
+    error: {
+      code: 404,
+      description: err.message || 'User not found',
+    },
+  })
+}
 
-//Not Found
-app.use(notFound)
+app.use(errorHandler)
 
 export default app

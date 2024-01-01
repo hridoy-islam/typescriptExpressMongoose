@@ -1,8 +1,10 @@
 import { Schema, model } from 'mongoose'
-import TUser, { TUserAddress, TUserName } from './User.interface'
+import TUser, { TUserAddress, TUserName, UserModel } from './User.interface'
+import config from '../../config'
+import bcrypt from 'bcrypt'
 
 const userNameSchema = new Schema<TUserName>({
-  firstname: { type: String, required: [true, 'First Name is Required'] },
+  firstName: { type: String, required: [true, 'First Name is Required'] },
   lastName: { type: String, required: [true, 'Last Name is Required'] },
 })
 
@@ -11,9 +13,13 @@ const userAddressSchema = new Schema<TUserAddress>({
   city: { type: String },
   country: { type: String },
 })
-const userSchema = new Schema<TUser>({
-  userId: { type: Number, required: [true, 'User id required'] },
-  username: { type: String, required: [true, 'Username is required'] },
+const userSchema = new Schema<TUser, UserModel>({
+  userId: { type: Number, required: [true, 'User id required'], unique: true },
+  username: {
+    type: String,
+    required: [true, 'Username is required'],
+    unique: true,
+  },
   password: { type: String, required: [true, 'Username is required'] },
   fullName: { type: userNameSchema },
   age: { type: Number },
@@ -23,4 +29,29 @@ const userSchema = new Schema<TUser>({
   address: { type: userAddressSchema },
 })
 
-export const User = model('User', userSchema)
+userSchema.pre('save', async function (next) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const user = this
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(config.bcrypt_salt_rounds),
+  )
+  next()
+})
+
+userSchema.post('save', function (doc, next) {
+  doc.password = ''
+  next()
+})
+
+userSchema.static('isUserExists', async function isUserExists(id: string) {
+  const existUser = await User.findById(id)
+  return existUser
+})
+
+userSchema.post('findOneAndUpdate', function (doc, next) {
+  doc.password = ''
+  next()
+})
+
+export const User = model<TUser, UserModel>('User', userSchema)

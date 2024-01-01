@@ -1,14 +1,12 @@
 import { Router } from 'express'
 import { UserControllers } from './User.controller'
-import validateRequest from '../../middlewares/validateRquest'
-import UserValidationSchema from './User.validation'
 
 const router = Router()
 
-router.post(
-  '/',
-  validateRequest(UserValidationSchema),
-  UserControllers.createUser,
-)
+router.post('/', UserControllers.createUser)
+
+router.get('/', UserControllers.getAllUsers)
+router.get('/:userId', UserControllers.getSingleUser)
+router.put('/:userId', UserControllers.updateUser)
 
 export const UserRoutes = router

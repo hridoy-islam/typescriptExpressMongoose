@@ -1,26 +1,26 @@
-import { z } from 'zod'
+import Joi from 'joi'
 
-const userAddressValidationSchema = z.object({
-  street: z.string(),
-  city: z.string(),
-  country: z.string(),
+const UserNameValidation = Joi.object({
+  firstName: Joi.string(),
+  lastName: Joi.string(),
 })
 
-const userNameValidationSchema = z.object({
-  firstname: z.string().min(1),
-  lastName: z.string().min(1).max(20),
+const UserNameAddress = Joi.object({
+  street: Joi.string(),
+  city: Joi.string(),
+  country: Joi.string(),
 })
 
-const UserValidationSchema = z.object({
-  userId: z.number(),
-  username: z.string(),
-  password: z.string(),
-  fullName: userNameValidationSchema,
-  age: z.number(),
-  email: z.string(),
-  isActive: z.boolean(),
-  hobbies: z.array(z.string()),
-  address: userAddressValidationSchema,
+const UserValidationSchema = Joi.object({
+  userid: Joi.number(),
+  username: Joi.string(),
+  password: Joi.string(),
+  fullName: UserNameValidation,
+  age: Joi.number(),
+  email: Joi.string(),
+  isActive: Joi.boolean(),
+  hobbies: Joi.array().items(Joi.string()),
+  address: UserNameAddress,
 })
 
 export default UserValidationSchema
